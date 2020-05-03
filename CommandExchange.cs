@@ -28,21 +28,21 @@ namespace ZaupUconomyEssentials
             if (amt.Length == 0)
             {
                 message = UconomyEssentials.Instance.Translate("exchange_usage_msg");
-                UnturnedChat.Say(playerid, message);
+                UnturnedChat.Say(playerid, message, "https://i.imgur.com/FeIvao9.png");
                 return;
             }
 
             if (amt.Length > 2)
             {
                 message = UconomyEssentials.Instance.Translate("exchange_usage_msg");
-                UnturnedChat.Say(playerid, message);
+                UnturnedChat.Say(playerid, message, "https://i.imgur.com/FeIvao9.png");
                 return;
             }
 
             if (!UconomyEssentials.Instance.Configuration.Instance.ExpExchange && amt.Length == 1)
             {
                 message = UconomyEssentials.Instance.Translate("experience_exchange_not_available");
-                UnturnedChat.Say(playerid, message);
+                UnturnedChat.Say(playerid, message, "https://i.imgur.com/FeIvao9.png");
                 return;
             }
 
@@ -59,14 +59,14 @@ namespace ZaupUconomyEssentials
             if (examt <= 0)
             {
                 message = UconomyEssentials.Instance.Translate("exchange_zero_amount_error");
-                UnturnedChat.Say(playerid, message);
+                UnturnedChat.Say(playerid, message, "https://i.imgur.com/FeIvao9.png");
                 return;
             }
 
             if (exp < examt && amt.Length == 1)
             {
                 message = UconomyEssentials.Instance.Translate("exchange_insufficient_experience", examt.ToString());
-                UnturnedChat.Say(playerid, message);
+                UnturnedChat.Say(playerid, message, "https://i.imgur.com/FeIvao9.png");
                 return;
             }
 
@@ -76,7 +76,7 @@ namespace ZaupUconomyEssentials
             {
                 message = UconomyEssentials.Instance.Translate("exchange_insufficient_money", examt.ToString(),
                     Uconomy.Instance.Configuration.Instance.MoneyName);
-                UnturnedChat.Say(playerid, message);
+                UnturnedChat.Say(playerid, message, "https://i.imgur.com/FeIvao9.png");
                 return;
             }
 
@@ -90,9 +90,10 @@ namespace ZaupUconomyEssentials
                     var newbal = Uconomy.Instance.Database.IncreaseBalance(playerid.CSteamID.ToString(), gain);
                     message = UconomyEssentials.Instance.Translate("new_balance_msg", newbal,
                         Uconomy.Instance.Configuration.Instance.MoneyName);
-                    UnturnedChat.Say(playerid, message);
+                    UnturnedChat.Say(playerid, message, "https://i.imgur.com/6EoLIWM.png");
                     playerid.Experience -= examt;
                     UconomyEssentials.HandleEvent(playerid, gain, "exchange", examt);
+                    Uconomy.Instance.Database.AddHistory(playerid.CSteamID, "UconomyEssentials", gain, "Exchange " + examt.ToString() + " EXP");
                     break;
                 case 2:
                     var gainm = (uint) (examt *
@@ -101,9 +102,10 @@ namespace ZaupUconomyEssentials
                     newbal = Uconomy.Instance.Database.IncreaseBalance(playerid.CSteamID.ToString(), examt * -1.0m);
                     message = UconomyEssentials.Instance.Translate("new_balance_msg", newbal,
                         Uconomy.Instance.Configuration.Instance.MoneyName);
-                    UnturnedChat.Say(playerid, message);
+                    UnturnedChat.Say(playerid, message, "https://i.imgur.com/6EoLIWM.png");
                     playerid.Experience += gainm;
                     UconomyEssentials.HandleEvent(playerid, gainm, "exchange", examt, "money");
+                    Uconomy.Instance.Database.AddHistory(playerid.CSteamID, "UconomyEssentials", -examt, "Exchange " + gainm.ToString() + " Money");
                     break;
             }
 

@@ -12,16 +12,26 @@ namespace ZaupUconomyEssentials
     {
         public static UconomyEssentials Instance;
         public Dictionary<string, decimal> groups = new Dictionary<string, decimal>();
-
+        public Dictionary<string, decimal> premiumgroups = new Dictionary<string, decimal>();
         protected override void Load()
         {
             Instance = this;
             var nlgroup = Configuration.Instance.PayGroups.Distinct(new GroupComparer()).ToList();
+            var nlpremiumgroup = Configuration.Instance.PayPremiumGroups.Distinct(new PremiumGroupComparer()).ToList();
             Configuration.Instance.PayGroups = nlgroup;
             foreach (var g in Configuration.Instance.PayGroups)
                 try
                 {
-                    groups.Add(g.DisplayName, g.Salary);
+                    groups.Add(g.GroupID, g.Salary);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogException(e);
+                }
+            foreach (var g in Configuration.Instance.PayPremiumGroups)
+                try
+                {
+                    premiumgroups.Add(g.GroupID, g.Salary);
                 }
                 catch (Exception e)
                 {
@@ -32,11 +42,16 @@ namespace ZaupUconomyEssentials
         protected override void Unload()
         {
             Instance.groups.Clear();
+            Instance.premiumgroups.Clear();
         }
 
         public delegate void PlayerPaidEvent(UnturnedPlayer player, decimal amount);
 
         public event PlayerPaidEvent OnPlayerPaid;
+
+        public delegate void PlayerPremiumPaidEvent(UnturnedPlayer player, decimal amount);
+
+        public event PlayerPremiumPaidEvent OnPlayerPremiumPaid;
 
         public delegate void PlayerLossEvent(UnturnedPlayer player, decimal amount);
 
@@ -106,6 +121,10 @@ namespace ZaupUconomyEssentials
                     "Usage: /apay <player name or id> <amt>"
                 },
                 {
+                    "apay_usage_msg",
+                    "Usage: /papay <player name or id> <amt>"
+                },
+                {
                     "exchange_usage_msg",
                     "Usage: /exchange <amount>[ money] (including money will exchange money to xp otherwise defaults xp to money)"
                 },
@@ -147,6 +166,10 @@ namespace ZaupUconomyEssentials
                 case "paid":
                     Instance.OnPlayerPaid?.Invoke(player, amount);
                     player.Player.gameObject.SendMessage("UEOnPlayerPaid", new object[] {player, amount});
+                    break;
+                case "ppaid":
+                    Instance.OnPlayerPremiumPaid?.Invoke(player, amount);
+                    player.Player.gameObject.SendMessage("UEOnPlayerPremiumPaid", new object[] { player, amount });
                     break;
                 case "loss":
                     Instance.OnPlayerLoss?.Invoke(player, amount);

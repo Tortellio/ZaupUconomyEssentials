@@ -19,11 +19,11 @@ namespace ZaupUconomyEssentials
         {
             _rpe = gameObject.transform.GetComponent<UnturnedPlayerEvents>();
             _lastpaid = DateTime.Now;
-            _rpe.OnDeath += rpe_OnPlayerDeath;
-            _rpe.OnUpdateStat += rpe_OnUpdateStat;
+            _rpe.OnDeath += Rpe_OnPlayerDeath;
+            _rpe.OnUpdateStat += Rpe_OnUpdateStat;
         }
 
-        private static void rpe_OnPlayerDeath(UnturnedPlayer player, EDeathCause cause, ELimb limb, CSteamID murderer)
+        private static void Rpe_OnPlayerDeath(UnturnedPlayer player, EDeathCause cause, ELimb limb, CSteamID murderer)
         {
             if (player == null) return;
             if (murderer == CSteamID.Nil) return;
@@ -46,11 +46,11 @@ namespace ZaupUconomyEssentials
                 UnturnedChat.Say(player.CSteamID,
                     UconomyEssentials.Instance.Translate("lose_suicide_msg",
                         UconomyEssentials.Instance.Configuration.Instance.LoseSuicideAmt,
-                        u.Configuration.Instance.MoneyName));
+                        u.Configuration.Instance.MoneyName), "https://i.imgur.com/abxMnf2.png");
                 if (bal1 != 0m)
                     UnturnedChat.Say(player.CSteamID,
                         UconomyEssentials.Instance.Translate("new_balance_msg", bal1,
-                            u.Configuration.Instance.MoneyName));
+                            u.Configuration.Instance.MoneyName), "https://i.imgur.com/hOhFr7X.png");
                 return;
             }
 
@@ -68,7 +68,7 @@ namespace ZaupUconomyEssentials
                 UnturnedChat.Say(player.CSteamID,
                     UconomyEssentials.Instance.Translate("lose_money_on_death_msg",
                         UconomyEssentials.Instance.Configuration.Instance.LoseMoneyOnDeathAmt,
-                        u.Configuration.Instance.MoneyName));
+                        u.Configuration.Instance.MoneyName), "https://i.imgur.com/abxMnf2.png");
             }
 
             // Pay the other player for the kill
@@ -82,13 +82,13 @@ namespace ZaupUconomyEssentials
             UnturnedChat.Say(murderer,
                 UconomyEssentials.Instance.Translate("to_killer_msg",
                     UconomyEssentials.Instance.Configuration.Instance.PayHitAmt, u.Configuration.Instance.MoneyName,
-                    player.CharacterName));
+                    player.CharacterName), "https://i.imgur.com/7DbFgKZ.png");
             if (bal != 0m)
                 UnturnedChat.Say(murderer,
-                    UconomyEssentials.Instance.Translate("new_balance_msg", balk, u.Configuration.Instance.MoneyName));
+                    UconomyEssentials.Instance.Translate("new_balance_msg", balk, u.Configuration.Instance.MoneyName), "https://i.imgur.com/hOhFr7X.png");
         }
 
-        private static void rpe_OnUpdateStat(UnturnedPlayer player, EPlayerStat stat)
+        private static void Rpe_OnUpdateStat(UnturnedPlayer player, EPlayerStat stat)
         {
             if (player == null) return;
 
@@ -106,7 +106,7 @@ namespace ZaupUconomyEssentials
                 UnturnedChat.Say(player.CSteamID,
                     UconomyEssentials.Instance.Translate("zombie_kill_paid_msg",
                         UconomyEssentials.Instance.Configuration.Instance.PayZombieAmt,
-                        u.Configuration.Instance.MoneyName, balzk, u.Configuration.Instance.MoneyName));
+                        u.Configuration.Instance.MoneyName, balzk, u.Configuration.Instance.MoneyName), "https://i.imgur.com/7DbFgKZ.png");
             }
             else if (UconomyEssentials.Instance.Configuration.Instance.PayMegaZombie &&
                      stat == EPlayerStat.KILLS_ZOMBIES_MEGA)
@@ -121,7 +121,7 @@ namespace ZaupUconomyEssentials
                 UnturnedChat.Say(player.CSteamID,
                     UconomyEssentials.Instance.Translate("mega_zombie_kill_paid_msg",
                         UconomyEssentials.Instance.Configuration.Instance.PayMegaZombieAmt,
-                        u.Configuration.Instance.MoneyName, balzk, u.Configuration.Instance.MoneyName));
+                        u.Configuration.Instance.MoneyName, balzk, u.Configuration.Instance.MoneyName), "https://i.imgur.com/7DbFgKZ.png");
             }
         }
 
@@ -133,7 +133,11 @@ namespace ZaupUconomyEssentials
 
             _lastpaid = DateTime.Now;
             UconomyEssentials.Instance.groups.TryGetValue("all", out var pay);
+            UconomyEssentials.Instance.premiumgroups.TryGetValue("all", out var ppay);
             var paygroup = "Player";
+            var paypremiumgroup = "Player";
+            var pass = false;
+            var ppass = false;
             if (pay == 0.0m)
             {
                 // We are checking for the different groups as All is not set.
@@ -143,9 +147,9 @@ namespace ZaupUconomyEssentials
                     paygroup = "admin";
                     if (pay == 0.0m)
                     {
-                        Logger.Log(UconomyEssentials.Instance.Translate(
-                            "unable_to_pay_group_msg", Player.CharacterName, "admin"));
-                        return;
+                        /*Logger.Log(UconomyEssentials.Instance.Translate(
+                            "unable_to_pay_group_msg", Player.CharacterName, "admin"));*/
+                        pass = true;
                     }
                 }
                 else
@@ -155,9 +159,9 @@ namespace ZaupUconomyEssentials
                     var plgroups = R.Permissions.GetGroups(Player, true);
                     foreach (var s in plgroups)
                     {
-                        Logger.Log(s.Id);
+                        //Logger.Log(s.Id);
                         UconomyEssentials.Instance.groups.TryGetValue(s.Id, out var pay2);
-                        Logger.Log(pay2.ToString());
+                        //Logger.Log(pay2.ToString());
                         if (pay2 <= pay) continue;
 
                         pay = pay2;
@@ -171,24 +175,84 @@ namespace ZaupUconomyEssentials
                         if (pay == 0.0m)
                         {
                             // There was an error.  End it.
-                            Logger.Log(
+                            /*Logger.Log(
                                 UconomyEssentials.Instance.Translate("unable_to_pay_group_msg", Player.CharacterName,
-                                    ""));
-                            return;
+                                    ""));*/
+                            pass = true;
                         }
                     }
                 }
             }
 
-            var bal = Uconomy.Instance.Database.IncreaseBalance(Player.CSteamID.ToString(), pay);
-            UconomyEssentials.HandleEvent(Player, pay, "paid");
-            UnturnedChat.Say(Player.CSteamID,
-                UconomyEssentials.Instance.Translate("pay_time_msg", pay,
-                    Uconomy.Instance.Configuration.Instance.MoneyName, paygroup));
-            if (bal >= 0.0m)
+            if (ppay == 0.0m)
+            {
+                // We are checking for the different groups as All is not set.
+                if (Player.IsAdmin && UconomyEssentials.Instance.premiumgroups.ContainsKey("admin"))
+                {
+                    UconomyEssentials.Instance.premiumgroups.TryGetValue("admin", out ppay);
+                    paypremiumgroup = "admin";
+                    if (ppay == 0.0m)
+                    {
+                        /*Logger.Log(UconomyEssentials.Instance.Translate(
+                            "unable_to_pay_group_msg", Player.CharacterName, "admin"));*/
+                        ppass = true;
+                    }
+                }
+                else
+                {
+                    // They aren't admin so we'll just go through like groups like normal.
+
+                    var plgroups = R.Permissions.GetGroups(Player, true);
+                    foreach (var s in plgroups)
+                    {
+                        //Logger.Log(s.Id);
+                        UconomyEssentials.Instance.premiumgroups.TryGetValue(s.Id, out var pay2);
+                        //Logger.Log(pay2.ToString());
+                        if (pay2 <= ppay) continue;
+
+                        ppay = pay2;
+                        paypremiumgroup = s.Id;
+                    }
+
+                    if (ppay == 0.0m)
+                    {
+                        // We assume they are default group.
+                        UconomyEssentials.Instance.premiumgroups.TryGetValue("default", out ppay);
+                        if (ppay == 0.0m)
+                        {
+                            // There was an error.  End it.
+                            /*Logger.Log(
+                                UconomyEssentials.Instance.Translate("unable_to_pay_group_msg", Player.CharacterName,
+                                    ""));*/
+                            ppass = true;
+                        }
+                    }
+                }
+            }
+            if (!pass)
+            {
+                var bal = Uconomy.Instance.Database.IncreaseBalance(Player.CSteamID.ToString(), pay);
+                UconomyEssentials.HandleEvent(Player, pay, "paid");
                 UnturnedChat.Say(Player.CSteamID,
-                    UconomyEssentials.Instance.Translate("new_balance_msg", bal,
-                        Uconomy.Instance.Configuration.Instance.MoneyName));
+                    UconomyEssentials.Instance.Translate("pay_time_msg", pay,
+                        Uconomy.Instance.Configuration.Instance.MoneyName, paygroup), "https://i.imgur.com/7DbFgKZ.png");
+                if (bal >= 0.0m)
+                    UnturnedChat.Say(Player.CSteamID,
+                        UconomyEssentials.Instance.Translate("new_balance_msg", bal,
+                            Uconomy.Instance.Configuration.Instance.MoneyName), "https://i.imgur.com/hOhFr7X.png");
+            }
+            if (!ppass)
+            {
+                var pbal = Uconomy.Instance.Database.IncreasePremiumBalance(Player.CSteamID.ToString(), ppay);
+                UconomyEssentials.HandleEvent(Player, ppay, "ppaid");
+                UnturnedChat.Say(Player.CSteamID,
+                    UconomyEssentials.Instance.Translate("pay_time_msg", ppay,
+                        Uconomy.Instance.Configuration.Instance.PremiumMoneyName, paypremiumgroup), "https://i.imgur.com/7DbFgKZ.png");
+                if (pbal >= 0.0m)
+                    UnturnedChat.Say(Player.CSteamID,
+                        UconomyEssentials.Instance.Translate("new_balance_msg", pbal,
+                            Uconomy.Instance.Configuration.Instance.PremiumMoneyName), "https://i.imgur.com/hOhFr7X.png");
+            }
         }
     }
 }

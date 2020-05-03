@@ -7,6 +7,7 @@ namespace ZaupUconomyEssentials
     {
         public bool PayTime;
         public List<Group> PayGroups;
+        public List<PremiumGroup> PayPremiumGroups;
         public int PayTimeSeconds;
         public bool PayHit;
         public float PayHitAmt;
@@ -32,10 +33,17 @@ namespace ZaupUconomyEssentials
             PayTime = false;
             PayGroups = new List<Group>
             {
-                new Group {DisplayName = "all", Salary = 1.0m},
-                new Group {DisplayName = "admin", Salary = 5.0m},
-                new Group {DisplayName = "moderator", Salary = 4.0m},
-                new Group {DisplayName = "guest", Salary = 1.0m}
+                new Group {GroupID = "all", Salary = 1.0m},
+                new Group {GroupID = "admin", Salary = 5.0m},
+                new Group {GroupID = "moderator", Salary = 4.0m},
+                new Group {GroupID = "guest", Salary = 1.0m}
+            };
+            PayPremiumGroups = new List<PremiumGroup>
+            {
+                new PremiumGroup {GroupID = "all", Salary = 1.0m},
+                new PremiumGroup {GroupID = "admin", Salary = 5.0m},
+                new PremiumGroup {GroupID = "moderator", Salary = 4.0m},
+                new PremiumGroup {GroupID = "guest", Salary = 1.0m}
             };
             PayTimeSeconds = 900;
             PayHit = false;
